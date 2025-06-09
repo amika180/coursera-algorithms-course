@@ -1,24 +1,31 @@
 #python3
-def solution(values):
-    total = sum(values)
-    if len(values) < 3 or total % 3:
+from sys import stdin
+
+def partition3(values):
+    total_sum = sum(values)
+    
+    if total_sum % 3 != 0:
         return 0
-    third = total // 3
-    table = [[0] * (len(values) + 1) for _ in range(third + 1)]
+    
+    target_sum = total_sum // 3
+    n = len(values)
+    
+    dp = [[[False] * (target_sum + 1) for _ in range(target_sum + 1)] for _ in range(n + 1)]
+    dp[0][0][0] = True
 
-    for i in range(1, third + 1):
-        for j in range(1, len(values) + 1):
-            ii = i - values[j - 1]
-            if values[j - 1] == i or (ii > 0 and table[ii][j - 1]):
-                table[i][j] = 1 if table[i][j - 1] == 0 else 2
-            else:
-                table[i][j] = table[i][j - 1]
-
-    return 1 if table[-1][-1] == 2 else 0
-
+    for i in range(1, n + 1):
+        num = values[i - 1]
+        for j in range(target_sum + 1):
+            for k in range(target_sum + 1):
+                dp[i][j][k] = dp[i-1][j][k]
+                if j >= num:
+                    dp[i][j][k] = dp[i][j][k] or dp[i-1][j-num][k]
+                if k >= num:
+                    dp[i][j][k] = dp[i][j][k] or dp[i-1][j][k-num]
+    return 1 if dp[n][target_sum][target_sum] else 0
 
 if __name__ == '__main__':
-    input()
+    input_n, *input_values = list(map(int, stdin.read().split()))
+    assert input_n == len(input_values)
+    print(partition3(input_values))
 
-    items = [x for x in map(int, input().split())]
-    print(solution(items))
